@@ -14,6 +14,18 @@ using std::ifstream;        using std::stringstream;
 using std::string;          using std::vector;
 using std::priority_queue;  using std::unordered_map;
 using std::unordered_set;   using std::cin;
+int numCommonLinks(const unordered_set<string>& curr_set, const unordered_set<string>& target_set);
+struct wikipath
+{
+    vector<string>path;
+    int numcommon;
+    wikipath(const vector<string>& init_path,const unordered_set<string>& curr_set ,const unordered_set<string>& target_set)
+    {
+        path = init_path;
+        numcommon = numCommonLinks(curr_set,target_set);
+    }
+};
+
 
 /*
  * This is the function you will be implementing parts of. It takes
@@ -46,10 +58,12 @@ int numCommonLinks(const unordered_set<string>& curr_set, const unordered_set<st
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 vector<string> findWikiLadder(const string& start_page, const string& end_page) {
+    if(start_page == end_page)
+    {
+        return {start_page};
+    }
     WikiScraper w;
 
-    /* Create alias for container backing priority_queue */
-    using container = vector<vector<string>>;
     unordered_set<string> target_set = w.getLinkSet(end_page);
 
     // TODO: ASSIGNMENT 2 TASK 6:
@@ -60,9 +74,8 @@ vector<string> findWikiLadder(const string& start_page, const string& end_page) 
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // BEGIN STUDENT CODE HERE
-    auto cmp_fn = [&w, &target_set](const vector<string>& left, const vector<string>& right) {
-        //int leftkey = numCommonLinks(target_set,w.getLinkSet(left.back())); int rightkey = numCommonLinks(target_set,w.getLinkSet(right.back())); 
-        //return leftkey > rightkey;
+    auto cmp_fn = [&w, &target_set](const wikipath& left, const wikipath& right) {
+        return left.numcommon < right.numcommon;
     };
     // END STUDENT CODE HERE
     ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,47 +89,53 @@ vector<string> findWikiLadder(const string& start_page, const string& end_page) 
     // BEGIN STUDENT CODE HERE
     // something like priority_queue<...> queue(...);
     // please delete ALL 4 of these lines! they are here just for the code to compile.
-    //std::priority_queue<vector<string>,vector<vector<string>>,decltype(cmp_fn)> queue(cmp_fn);
+    std::priority_queue<wikipath,vector<wikipath>,decltype(cmp_fn)> queue(cmp_fn);
 
     // END STUDENT CODE HERE
     ///////////////////////////////////////////////////////////////////////////////////////////////////
-    std::queue<vector<string>> queue;
-    queue.push({start_page});
-    unordered_set<string> visited;
-
+    auto first_extend = w.getLinkSet(start_page);
+    if(first_extend.find(end_page) != first_extend.end())
+    {
+        return vector<string>{start_page,end_page};
+    }
+    wikipath first_one({start_page},first_extend,target_set);
+    queue.push(first_one);
+    unordered_set<string> visited;//Is in queue or has been out of queue.
+    visited.insert(start_page);
     while(!queue.empty()) {
-        vector<string> curr_path = queue.front();
+        wikipath curr_pack = queue.top();
+        vector<string>& curr_path = curr_pack.path;
+        queue.pop();
+        string& curr = curr_path.back();
+        //guarantee that 1. curr != end_page  
+        //2. Cannot reach end_page directly from curr.  
+
+
         //cout << "curr_path:  " << endl;
-        //for(auto tstr : curr_path)
+        //for(const auto& tstr : curr_path)
         //{
         //    cout << tstr << endl;
         //}
-        queue.pop();
-        string curr = curr_path.back();
         //cout << "get set: " << curr << endl;
         auto link_set = w.getLinkSet(curr);
-        //cout << endl << "complete getlinkset" << endl;
-        /*
-         * Early check for whether we have found a ladder.
-         * By doing this check up here we spead up the code because
-         * we don't enqueue every link on this page if the target page
-         * is in the links of this set.
-         */
-        if(link_set.find(end_page) != link_set.end()) {
-            curr_path.push_back(end_page);
-            //cout << endl << "found: " << end_page << endl;
-            //cout << endl << "DONE!!" << endl;
-            return curr_path;
-        }
         //cout << "NOW look for neighbor" << endl;
         for(const string& neighbour : link_set) {
-            
             if(visited.find(neighbour) == visited.end()) {
                 //cout << neighbour << endl;
                 visited.insert(neighbour);
                 vector<string> new_path = curr_path;
                 new_path.push_back(neighbour);
-                queue.push(new_path);
+                auto tempuset = w.getLinkSet(neighbour);
+                //Early check.  
+                if(tempuset.find(end_page)!=tempuset.end())
+                {
+                    new_path.push_back(end_page);
+                    //cout << endl << "found: " << end_page << endl;
+                    //cout << endl << "DONE!!" << endl;
+                    return new_path;
+                }
+                wikipath nextpath(new_path,tempuset,target_set);
+                queue.push(nextpath);
             }
         }
     }
