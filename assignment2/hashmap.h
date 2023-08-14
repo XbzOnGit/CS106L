@@ -207,7 +207,7 @@ public:
     * A noexcept function that throws an exception will automatically
     * terminate the program.
     */
-    inline size_t bucket_count() const;
+    inline size_t bucket_count() const noexcept;
 
     /*
     * Returns whether or not the HashMap contains the given key.

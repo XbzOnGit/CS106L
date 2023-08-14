@@ -1,5 +1,6 @@
 Assignment 3: STL HashMap (short answer questions)  
 Names: XbzOnGit  
+Milestone1:  
 1. at() vs []  
 at will throw an exception if the key is not found, while [] will do auto-insertion.  
 We need a const version of at(), and it can be used in other const functions.  
@@ -17,5 +18,47 @@ suffix++ is implemented by making a copy and then use prefix++, then return the 
 Note that suffix++ only return iterator copy, while prefix++ returns a reference to itself.  
 It assumes that the iterator is correct and not .end(), no check on .end() is made.  
 It will cause UB.  
+
+Milestone2:  
+1. attachment issues
+For HashMap class:  
+
+default constructor: We need some buckets to exsist initially.  
+So we cannot leave an empty vector there.  
+destructor:  We need to free the resources in buckets.  
+We should delete every node object we get by new.  
+copy constructor: We need a deep copy.  
+copy assignment operator: We need deep copy && free the original resources. move constructor: the default one will work.    
+move assignment operator: We need to free the original resources.  
+
+We are managing the underlaying resouces in a dynamic storage with 
+new and delete manually, so according to rule of five, we need to 
+implement those special member functions.  
+
+What's more, std::vector constructor and assignment is simply copying 
+every element.  
+Cos the elements are pointers here, this is not enough.  
+I implemented a function to make a deep copy of that if 
+before calling that function, we have
+1. size() == size()
+2. this->arr all filled with nullptr in [0,size()).  
+Then that function can make a deep copy of vector here.  
+
+For move, the default vector move is enough.  
+
+
+
+For HashMapIterator class:  
+
+Only a pointer to an array of buckets(should be shared), bucket number, a pointer to a node is there.  
+We do not need a default constructor(That might even cause bugs).  
+destructor is also not needed, cos we should not free those resources.  
+The other four can be implemented in the default way.  
+According to rule of zero, we'd better default all of them.  
+
+2. move semantics  
+If I do not use std::move, every member inside will need a copy.  
+For some complex type managing something inside like std::vector, it 
+will bring huge cost.  
 
 

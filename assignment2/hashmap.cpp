@@ -9,9 +9,10 @@ template <typename K, typename M, typename H>
 HashMap<K, M, H>::HashMap() : 
     HashMap{kDefaultBuckets} { }
 
-//Help function to copy the array of buckets.  
-//Must guarantee than this->_buckets_array is at least as big as rhs.  
-//And must guaratee that all of its elements are nullptr before the call.  
+//Help function to copy the array of buckets(lists).  
+//1. Must guarantee than this->_buckets_array is at least as big as rhs.  
+//(Actually we need it to be the same, to make sure that the mod number did not change).  
+//2. And must guaratee that all of its elements are nullptr before the call.  
 template <typename K, typename M, typename H>
 void HashMap<K, M, H>::copy_bucket_arr(const bucket_array_type& rhs)
 {
@@ -52,9 +53,12 @@ typename HashMap<K, M, H>::HashMap& HashMap<K, M, H>::operator=(const HashMap& r
     }
     //Free its original resources.  
     clear();
+    //And now all nullptr
     this->_size = rhs._size;
     this->_hash_function = rhs._hash_function;
     this->_buckets_array.resize(rhs._buckets_array.size(),nullptr);
+    //bucket number must be the same.  
+    //We have guaranteed the two conditions required by copy_bucket_arr now.  
     this->copy_bucket_arr(rhs._buckets_array);
     return (*this);
 }
@@ -101,7 +105,7 @@ inline float HashMap<K, M, H>::load_factor()const {
 };
 
 template <typename K, typename M, typename H>
-inline size_t HashMap<K, M, H>::bucket_count() const{
+inline size_t HashMap<K, M, H>::bucket_count() const noexcept{
     return _buckets_array.size();
 };
 
