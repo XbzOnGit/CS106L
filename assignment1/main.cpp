@@ -74,7 +74,7 @@ vector<string> findWikiLadder(const string& start_page, const string& end_page) 
     
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // BEGIN STUDENT CODE HERE
-    auto cmp_fn = [&w, &target_set](const wikipath& left, const wikipath& right) {
+    auto cmp_fn = [](const wikipath& left, const wikipath& right) {
         return left.numcommon < right.numcommon;
     };
     // END STUDENT CODE HERE

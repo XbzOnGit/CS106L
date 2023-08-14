@@ -1,0 +1,21 @@
+Assignment 3: STL HashMap (short answer questions)  
+Names: XbzOnGit  
+1. at() vs []  
+at will throw an exception if the key is not found, while [] will do auto-insertion.  
+We need a const version of at(), and it can be used in other const functions.  
+But due to its semantics, it is impossible to have a const version of [].  
+2. .find vs std::find
+.find in hashmap is on average O(1), while std::find is a linear search which is on average O(n).  
+3. RAII  
+This HashMap class is RAII-compliant.  
+Looking into ins constructors, you can find that all its resources are acquired inside to be in valid state.  
+In destructor, it also clears all its contents(with my fix).  
+4. operator++  
+prefix++ is implemented by increasing itself first, and if it reaches nullptr, it will try to find the next
+bucket with elements.  
+suffix++ is implemented by making a copy and then use prefix++, then return the copy.  
+Note that suffix++ only return iterator copy, while prefix++ returns a reference to itself.  
+It assumes that the iterator is correct and not .end(), no check on .end() is made.  
+It will cause UB.  
+
+
